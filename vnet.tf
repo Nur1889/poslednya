@@ -1,56 +1,33 @@
-terraform {
-  backend “azurerm” {
-    resource_group_name  = “cloud-shell-storage-eastus”
-    storage_account_name = “terraformbackendteam2”
-    container_name       = “terraformtfstate”
-    key                  = “team2/rds/terraformtfstate”
-    access_key           = “NFUpV6eK17Uz57hdxVSGl9RuP3VEtHeMjzLZ2ql/cS06dChmgukp3BBWKHKDl/+89jj0Aau0HTC4+AStU7mK4A==”
-  }
+resource "azurerm_resource_group" "example" {
+  name     = "example-resources"
+  location = "West Europe"
 }
-terraform {
+
+resource "azurerm_network_security_group" "example" {
+  name                = "example-security-group"
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
 }
-# Create a resource group
-resource “azurerm_resource_group” “terraform” {
-  name     = “terraform-resources”
-  location = “westus”
-}
-resource “azurerm_network_security_group” “terraform” {
-  name                = “terraform-security-group”
-  location            = azurerm_resource_group.terraform.location
-  resource_group_name = azurerm_resource_group.terraform.name
-}
-resource “azurerm_network_security_rule” “terraform” {
-  name                        = “test123"
-  priority                    = 100
-  direction                   = “Outbound”
-  access                      = “Allow”
-  protocol                    = “Tcp”
-  source_port_range           = “*”
-  destination_port_range      = “*”
-  source_address_prefix       = “*”
-  destination_address_prefix  = “*”
-  resource_group_name         = azurerm_resource_group.terraform.name
-  network_security_group_name = azurerm_network_security_group.terraform.name
-}
-# Create a virtual network within the resource group
-resource “azurerm_virtual_network” “terraform” {
-  name                = “terraform_vnet”
-  location            = azurerm_resource_group.terraform.location
-  resource_group_name = azurerm_resource_group.terraform.name
-  address_space       = [“10.0.0.0/16”]
+
+resource "azurerm_virtual_network" "example" {
+  name                = "example-network"
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
+  address_space       = ["10.0.0.0/16"]
+  dns_servers         = ["10.0.0.4", "10.0.0.5"]
+
   subnet {
-    name           = “subnet1"
-    address_prefix = “10.0.1.0/24”
-    security_group = azurerm_network_security_group.terraform.id
+    name           = "subnet1"
+    address_prefix = "10.0.1.0/24"
   }
+
   subnet {
-    name           = “subnet2"
-    address_prefix = “10.0.2.0/24”
-    security_group = azurerm_network_security_group.terraform.id
+    name           = "subnet2"
+    address_prefix = "10.0.2.0/24"
+    security_group = azurerm_network_security_group.example.id
   }
-  subnet {
-    name           = “subnet3"
-    address_prefix = “10.0.3.0/24”
-    security_group = azurerm_network_security_group.terraform.id
+
+  tags = {
+    environment = "Production"
   }
 }
